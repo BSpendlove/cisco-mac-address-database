@@ -1,6 +1,5 @@
 from flask import Blueprint, request
-from app.views import api_users
-from app.models import Device, User, MacEntry
+from app.models import Device, MacEntry
 from app import db
 from app.helpers import json_responses, ssh_helpers, dbfunctions
 
@@ -96,7 +95,7 @@ def api_get_device_macs(id):
     if not device:
         return json_responses.generic_response(True, "device {} does not exist.".format(id))
 
-    user = User.query.get(device.authentication_user)
+    user = dbfunctions.check_user_exist(device.authentication_user)
 
     ssh_session = None
     try:
