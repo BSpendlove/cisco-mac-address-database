@@ -23,7 +23,7 @@ You can find below some documentation on the different routes/views for the API 
             "username": "cisco"
         },
         {
-            //etc..... more users user
+            "comment": "more entries here..."
         }
     ],
     "error": false
@@ -112,7 +112,7 @@ You can find below some documentation on the different routes/views for the API 
             "port": 22
         },
         {
-            //etc..... more devices here
+            "comment": "more entries here..."
         }
     ],
     "error": false
@@ -135,7 +135,7 @@ You can find below some documentation on the different routes/views for the API 
                     "port": "CPU"
                 },
                 {
-                    //other mac entries here....
+                    "comment": "more entries here..."
                 }
             ],
             "netmiko_driver": "cisco_ios",
@@ -187,7 +187,7 @@ You can find below some documentation on the different routes/views for the API 
                     "port": "CPU"
                 },
                 {
-                    //other mac entries here....
+                    "comment": "more entries here..."
                 }
             ],
             "netmiko_driver": "cisco_asa",
@@ -206,3 +206,83 @@ Any MAC addresses that exist in the database but are not found on the device wil
 Any new MAC addresses will be added into the database.
 
 Any existing MAC addresses will be updated if required (eg. found on a different VLAN/Port)
+
+```json
+{
+    "data": [
+        {
+            "address": "000b.82f0.d3c6",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 21,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "0c8b.fd9a.952a",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 22,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "309c.2309.9146",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 23,
+            "port": "Gi1/0/20",
+            "vlan": "224"
+        },
+        {
+            "address": "400d.10e4.10f0",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 24,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "4c8d.79ee.45ba",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 25,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "7054.b454.486f",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 26,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "be98.bd8f.71a0",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 28,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "e8d8.195d.fd2b",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 29,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        },
+        {
+            "address": "e8f2.e2a4.7c71",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 30,
+            "port": "Gi1/0/11",
+            "vlan": "224"
+        }
+    ],
+    "error": false
+}
+```
