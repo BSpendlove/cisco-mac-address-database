@@ -89,6 +89,24 @@ def api_update_device(id):
     db.session.commit()
     return json_responses.generic_response(False, [device.as_dict()])
 
+@bp.route("/<int:id>/macs_by_port", methods=["POST"])
+def api_get_device_macs_by_port(id):
+    if not request.is_json:
+        return json_responses.invalid_json()
+
+    data = request.get_json()
+
+    check_fields = json_responses.check_fields(["port"], data)
+    if check_fields["error"]:
+        return check_fields
+
+    device = dbfunctions.check_device_exist(id)
+    if not device:
+        return json_responses.generic_response(True, "device {} does not exist.".format(id))
+
+    macs = dbfunctions.get_device_macs_by_port(device.id, data["port"])
+    return json_responses.generic_response(False, [mac.as_dict() for mac in macs if macs])
+
 @bp.route("/<int:id>/get_mac_table", methods=["GET"])
 def api_get_device_macs(id):
     device = dbfunctions.check_device_exist(id)

@@ -44,6 +44,15 @@ def get_device_macs(id):
         return None
     return device.mac_entries.all()
 
+def get_device_macs_by_port(id, port):
+    device = check_device_exist(id)
+    if not device:
+        return None
+    macs = MacEntry.query.filter_by(port=port).all()
+    if not macs:
+        return None
+    return macs
+
 def check_netmiko_driver(driver):
     if driver in CLASS_MAPPER.keys():
         return True

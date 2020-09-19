@@ -286,3 +286,22 @@ Any existing MAC addresses will be updated if required (eg. found on a different
     "error": false
 }
 ```
+
+#### /api/v1/devices/<int:id>/macs_by_port
+[POST] - Returns all MAC addresses on a port for a given device in JSON format.
+Eg. Sending {"port": "Gi1/0/20"} in the HTTP POST body will result in the below:
+```json
+{
+    "data": [
+        {
+            "address": "309c.2309.9146",
+            "address_type": "DYNAMIC",
+            "device_id": 1,
+            "id": 23,
+            "port": "Gi1/0/20",
+            "vlan": 224
+        }
+    ],
+    "error": false
+}
+```
