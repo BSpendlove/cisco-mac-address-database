@@ -1,2 +1,208 @@
 # cisco-mac-address-database
-A basic Database + Flask API to store MAC addresses in a database. API returns JSON data for MAC addresses.
+A basic Database + Flask API to store MAC addresses in a database. API returns JSON data for MAC addresses. This is a test flask application that shouldn't be used in production because passwords are stored in the database as plain text to be used during the SSH session.
+
+This app is an example on being able to obtain the network state for current MAC addresses in the network and allows the database to be maintained (automatically removes stale mac entries and adds new/updates existing mac entries in the mac_entry table...)
+
+You can find below some documentation on the different routes/views for the API and examples of the returned output.
+
+## API Views:
+### /api/v1/<view>
+
+#### /api/v1/users/
+[GET] - Returns a list of all the users configured in the database
+```json
+{
+    "data": [
+        {
+            "devices": [
+                1
+            ],
+            "id": 1,
+            "password": "ciscodisco",
+            "secret": "ciscodisco",
+            "username": "cisco"
+        },
+        {
+            //etc..... more users user
+        }
+    ],
+    "error": false
+}
+```
+
+#### /api/v1/users/<int:id>
+[GET] - Returns JSON format of the user if it exist
+```json
+{
+    "data": [
+        {
+            "devices": [
+                1
+            ],
+            "id": 1,
+            "password": "ciscodisco",
+            "secret": "ciscodisco",
+            "username": "cisco"
+        }
+    ],
+    "error": false
+}
+```
+
+
+[POST] - Creates a User and returns the JSON format of the created user if it doesn't exist
+```json
+{
+    "data": [
+        {
+            "devices": [],
+            "id": 2,
+            "password": "ciscodisco",
+            "secret": "ciscodisco",
+            "username": "apiusertest"
+        }
+    ],
+    "error": false
+}
+```
+
+[DELETE] - Deletes a User and returns generic JSON response
+```json
+{
+    "error": false,
+    "message": "Successfully deleted user 2."
+}
+```
+
+[PATCH] - Updates information for a given user if they exist. Returns the JSON format after successfully updating the device.
+```json
+{
+    "data": [
+        {
+            "devices": [
+                1
+            ],
+            "id": 1,
+            "password": "newpassword",
+            "secret": "ciscodisco",
+            "username": "cisco"
+        }
+    ],
+    "error": false
+}
+```
+
+#### /api/v1/devices/
+[GET] - Returns a list of all the devices configured in the database
+```json
+{
+    "data": [
+        {
+            "authentication_user": 1,
+            "friendly_name": "CSW01",
+            "id": 1,
+            "ip": "192.168.0.252",
+            "mac_entries": [
+                {
+                    "address": "0100.0ccc.cccc",
+                    "port": "CPU"
+                }
+            ],
+            "netmiko_driver": "cisco_ios",
+            "port": 22
+        },
+        {
+            //etc..... more devices here
+        }
+    ],
+    "error": false
+}
+```
+
+#### /api/v1/devices/<int:id>
+[GET] - Returns JSON format of the device if it exist
+```json
+{
+    "data": [
+        {
+            "authentication_user": 1,
+            "friendly_name": "CSW01",
+            "id": 1,
+            "ip": "192.168.0.252",
+            "mac_entries": [
+                {
+                    "address": "0100.0ccc.cccc",
+                    "port": "CPU"
+                },
+                {
+                    //other mac entries here....
+                }
+            ],
+            "netmiko_driver": "cisco_ios",
+            "port": 22
+        }
+    ],
+    "error": false
+}
+```
+
+[POST] - Creates a Device and returns the JSON format of the created device if it doesn't exist
+```json
+{
+    "data": [
+        {
+            "authentication_user": 1,
+            "friendly_name": "CSW02",
+            "id": 2,
+            "ip": "192.168.0.253",
+            "mac_entries": [],
+            "netmiko_driver": "cisco_ios",
+            "port": 22
+        }
+    ],
+    "error": false
+}
+```
+
+[DELETE] - Deletes a Device and returns generic JSON response
+```json
+{
+    "error": false,
+    "message": "Successfully deleted device 2."
+}
+```
+
+[PATCH] - Updates information for a given device if it exist. Returns the JSON format after successfully updating the device.
+```json
+{
+    "data": [
+        {
+            "authentication_user": 1,
+            "friendly_name": "CSW01",
+            "id": 1,
+            "ip": "192.168.0.252",
+            "mac_entries": [
+                {
+                    "address": "0100.0ccc.cccc",
+                    "port": "CPU"
+                },
+                {
+                    //other mac entries here....
+                }
+            ],
+            "netmiko_driver": "cisco_asa",
+            "port": 22
+        }
+    ],
+    "error": false
+}
+```
+
+#### /api/v1/devices/<int:id>/get_mac_table
+[GET] - Establishes an SSH session with the device, checks the MAC address and manages the MacEntry database table as intended.
+
+Any MAC addresses that exist in the database but are not found on the device will be removed from the device.
+
+Any new MAC addresses will be added into the database.
+
+Any existing MAC addresses will be updated if required (eg. found on a different VLAN/Port)
