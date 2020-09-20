@@ -29,3 +29,10 @@ class CiscoIOSSSH:
         for index, entry in enumerate(filtered_output):
             filtered_output[index]["device_id"] = self.device_id
         return filtered_output
+
+    def show_interfaces(self, command="show interfaces"):
+        output = self.ssh_session.send_command(command)
+        filtered_output = textfsm_extractor("cisco_ios_show_interfaces.template", output)
+        for index, entry in enumerate(filtered_output):
+            filtered_output[index]["device_id"] = self.device_id
+        return filtered_output

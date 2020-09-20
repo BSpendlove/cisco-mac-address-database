@@ -28,3 +28,10 @@ def check_fields(required, data):
     return {
         "error": False
     }
+
+def payload_builder(objmap=None, **kwargs):
+    payload = {}
+    for key,val in kwargs.items():
+        if key in objmap:
+            payload[objmap[key]] = val
+    return payload

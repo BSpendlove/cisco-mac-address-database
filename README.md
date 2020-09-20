@@ -5,6 +5,8 @@ This app is an example on being able to obtain the network state for current MAC
 
 You can find below some documentation on the different routes/views for the API and examples of the returned output.
 
+---
+
 ## API Views:
 ### /api/v1/<view>
 
@@ -198,7 +200,25 @@ You can find below some documentation on the different routes/views for the API 
 }
 ```
 
-#### /api/v1/devices/<int:id>/get_mac_table
+---
+
+### Important Note
+
+There is a slight difference on the flask views below. If you include /ssh in the route, they will invoke an SSH session, create/update entries in the database and return them as intended.
+
+However if you would like to just query the current information in the database without invoking an SSH session and creating/updating the current entries within the database, then you will need to call the view without the /ssh.
+
+For example, if you would like to grab the current MAC addresses from a device and update the database you would call:
+
+/api/v1/devices/<int:id>/ssh/get_mac_table - This view is described in more detail below.
+
+However if you would just like to obtain the current MAC addresses stored in the database because you have only just updated the database 5 seconds ago and want speed to query the database (avoiding the time it takes to SSH to the device and update the database), then you can use:
+
+/api/v1/devices/<int:id>/get_mac_table
+
+---
+
+#### /api/v1/devices/<int:id>/ssh/get_mac_table
 [GET] - Establishes an SSH session with the device, checks the MAC address and manages the MacEntry database table as intended.
 
 Any MAC addresses that exist in the database but are not found on the device will be removed from the device.
@@ -287,7 +307,7 @@ Any existing MAC addresses will be updated if required (eg. found on a different
 }
 ```
 
-#### /api/v1/devices/<int:id>/macs_by_port
+#### /api/v1/devices/<int:id>/ssh/macs_by_port
 [POST] - Returns all MAC addresses on a port for a given device in JSON format.
 Eg. Sending {"port": "Gi1/0/20"} in the HTTP POST body will result in the below:
 ```json

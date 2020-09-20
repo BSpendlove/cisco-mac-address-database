@@ -1,9 +1,14 @@
 from flask import Blueprint, request
-from app.models import Device, MacEntry
+from app.models import Device, MacEntry, Interface
 from app import db
 from app.helpers import json_responses, ssh_helpers, dbfunctions
 
 bp = Blueprint("api_devices", __name__, url_prefix="/api/v1/devices")
+
+# /ssh routes will invoke SSH sessions whereas if you'd like to only filter on the database, remove the relevant /ssh route...
+# eg:
+#   /api/v1/devices/1/ssh/get_interfaces - Will SSH to the device and create/update interfaces in the database, and return them
+#   /api/v1/devices/1/get_interfaces - Will query the database and not invoke any SSH and database CREATE/UPDATE queries. This is just a SELECT query.
 
 @bp.route("/", methods=["GET"])
 def api_devices():
@@ -89,8 +94,38 @@ def api_update_device(id):
     db.session.commit()
     return json_responses.generic_response(False, [device.as_dict()])
 
-@bp.route("/<int:id>/macs_by_port", methods=["POST"])
-def api_get_device_macs_by_port(id):
+@bp.route("/<int:id>/ssh/get_interfaces", methods=["GET"])
+def api_ssh_get_device_interfaces(id):
+    device = dbfunctions.check_device_exist(id)
+    if not device:
+        return json_responses.generic_response(True, "device {} does not exist.".format(id))
+
+    user = dbfunctions.check_user_exist(device.authentication_user)
+
+    ssh_session = None
+    try:
+        ssh_session = ssh_helpers.CiscoIOSSSH(device, user)
+    except Exception as error:
+        return json_responses.generic_response(True, error)
+
+    interfaces = ssh_session.show_interfaces()
+    added_interfaces = []
+    for entry in interfaces:
+        _interface = dbfunctions.create_interface(**entry)
+        added_interfaces.append(_interface.as_dict())
+
+    return json_responses.generic_response(False, added_interfaces)
+
+@bp.route("/<int:id>/get_interfaces", methods=["GET"])
+def api_get_device_interfaces(id):
+    device = dbfunctions.check_device_exist(id)
+    if not device:
+        return json_responses.generic_response(True, "device {} does not exist.".format(id))
+
+    return json_responses.generic_response(False, [interface.as_dict() for interface in device.interfaces.all()])
+
+@bp.route("/<int:id>/ssh/macs_by_port", methods=["POST"])
+def api_ssh_get_device_macs_by_port(id):
     if not request.is_json:
         return json_responses.invalid_json()
 
@@ -107,8 +142,8 @@ def api_get_device_macs_by_port(id):
     macs = dbfunctions.get_device_macs_by_port(device.id, data["port"])
     return json_responses.generic_response(False, [mac.as_dict() for mac in macs if macs])
 
-@bp.route("/<int:id>/get_mac_table", methods=["GET"])
-def api_get_device_macs(id):
+@bp.route("/<int:id>/ssh/get_mac_table", methods=["GET"])
+def api_ssh_get_device_macs(id):
     device = dbfunctions.check_device_exist(id)
     if not device:
         return json_responses.generic_response(True, "device {} does not exist.".format(id))
@@ -129,23 +164,19 @@ def api_get_device_macs(id):
 
     added_macs = []
     for entry in mac_entries:
-        check_mac_exist = dbfunctions.check_mac_exist_address(entry["address"])
-        if not check_mac_exist:
-            mac = MacEntry(**entry)
-            db.session.add(mac)
-            added_macs.append(mac.as_dict())
-        else:
-            for k,v in entry.items(): # Update existing MAC Addresses
-                setattr(check_mac_exist, k, v)
-            added_macs.append(check_mac_exist.as_dict())
-            del cleanup_macs_in_database[cleanup_macs_in_database.index(entry["address"])]
+        _mac = dbfunctions.create_mac_address(**entry)
+        if _mac.address in cleanup_macs_in_database:
+            del cleanup_macs_in_database[cleanup_macs_in_database.index(_mac.address)]
+        added_macs.append(_mac.as_dict())
 
-    for stale_mac in cleanup_macs_in_database:
-        stale_mac = dbfunctions.check_mac_exist_address(stale_mac)
-        if not stale_mac:
-            continue
-        db.session.delete(stale_mac)
-        print("Deleting Stale MAC {}".format(stale_mac.address))
-    db.session.commit()
+    dbfunctions.cleanup_mac_addresses(cleanup_macs_in_database)
 
     return json_responses.generic_response(False, added_macs)
+
+@bp.route("/<int:id>/get_mac_table", methods=["GET"])
+def api_get_device_macs(id):
+    device = dbfunctions.check_device_exist(id)
+    if not device:
+        return json_responses.generic_response(True, "device {} does not exist.".format(id))
+
+    return json_responses.generic_response(False, [mac.as_dict() for mac in device.mac_entries.all()])
