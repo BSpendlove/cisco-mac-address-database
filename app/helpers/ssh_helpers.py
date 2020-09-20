@@ -25,14 +25,14 @@ class CiscoIOSSSH:
 
     def show_mac_address_table(self, command="show mac address-table"):
         output = self.ssh_session.send_command(command)
-        filtered_output = textfsm_extractor("cisco_ios_show_mac_address_table.template", output)
+        filtered_output = textfsm_extractor("{}_show_mac_address_table.template".format(self.device_type), output)
         for index, entry in enumerate(filtered_output):
             filtered_output[index]["device_id"] = self.device_id
         return filtered_output
 
     def show_interfaces(self, command="show interfaces"):
         output = self.ssh_session.send_command(command)
-        filtered_output = textfsm_extractor("cisco_ios_show_interfaces.template", output)
+        filtered_output = textfsm_extractor("{}_show_interfaces.template".format(self.device_type), output)
         for index, entry in enumerate(filtered_output):
             filtered_output[index]["device_id"] = self.device_id
         return filtered_output
