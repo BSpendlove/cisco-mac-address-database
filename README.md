@@ -5,6 +5,8 @@ This app is an example on being able to obtain the network state for current MAC
 
 You can find below some documentation on the different routes/views for the API and examples of the returned output.
 
+Don't use this in production, use something more scalable (if you don't want cancer, don't use ansible) like netpalm...
+
 ---
 
 ## API Views:
